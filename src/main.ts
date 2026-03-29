@@ -4,6 +4,8 @@ import { AllExceptionsFilter } from './common/filters/all-expections.filters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api/v1')
+  app.useGlobalFilters(new AllExceptionsFilter());
   const allowedOrigins = [
     'http://localhost:3000',
     'https://wareon.vercel.app',
@@ -16,9 +18,6 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization',
   });
 
-
-  app.setGlobalPrefix('api/v1')
-  app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(3000);
 }
 
