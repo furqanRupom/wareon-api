@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto, CreateUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
@@ -31,9 +31,9 @@ export class AuthController {
     }
 
     @HttpCode(HttpStatus.OK)
-    @Post('profile')
-    async profile(@Body('userId') userId: string) {
-        const result = await this.authService.profile(userId);
+    @Get('me')
+    async profile(@Req() req: AuthRequest) {
+        const result = await this.authService.profile(req.user.id);
         return {
             success: true,
             message: 'User profile retrieved successfully',
@@ -43,7 +43,7 @@ export class AuthController {
 
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Put('me/:id')
+    @Put('profile/:id')
     async updateProfile(@Req() req: AuthRequest, @Body() updateData: Partial<CreateUserDto>) {
         const result = await this.authService.updateProfile(req.user.id, updateData);
         return {
