@@ -28,19 +28,19 @@ export class AuthRepository {
 
     async createUser(dto: CreateUserDto): Promise<User> {
         const userId = await this.generateUserId();
-        const newUser = new this.userModel({
-            ...dto,
-            userId,
-        });
-        return newUser.save();
+        const createUser = await this.userModel.create({ ...dto, userId });
+        return createUser.toObject();
     }
 
-    async findByEmail(email: string): Promise<User | null> {
+    async findByEmail(email: string): Promise<UserDocument | null> {
         return this.userModel.findOne({ email }).exec();
     }
 
-    async findById(id: string): Promise<User | null> {
+    async findById(id: string): Promise<UserDocument | null> {
         return this.userModel.findById(id).exec();
+    }
+    async findOne(userId: string): Promise<UserDocument | null> {
+        return this.userModel.findOne({ userId }).exec();
     }
 
 }

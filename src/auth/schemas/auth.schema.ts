@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-
-export type UserDocument = User & Document;
+import { Document, HydratedDocument } from 'mongoose';
+import bcrypt from "bcryptjs";
+export type UserDocument = HydratedDocument<User, UserMethods>;
 
 @Schema({ timestamps: true })
 export class User {
@@ -35,3 +35,14 @@ UserSchema.set('toJSON', {
         return rest;
     },
 });
+export interface UserMethods {
+    comparePassword(password: string): Promise<boolean>;
+}
+
+UserSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    this.password = await bcrypt.hash(this.password, 10);
+});
+UserSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
+}
