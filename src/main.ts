@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-expections.filters';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1')
-  app.useGlobalFilters(new AllExceptionsFilter());
+
   const allowedOrigins = [
     'http://localhost:3000',
     'https://wareon.vercel.app',
@@ -17,7 +17,9 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
   });
-
+  app.setGlobalPrefix('api/v1')
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.listen(3000);
 }
 
