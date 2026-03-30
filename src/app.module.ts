@@ -10,6 +10,7 @@ import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
 import { RestockQueueModule } from './restock-queue/restock-queue.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 
 @Module({
@@ -34,6 +35,7 @@ import { ActivityLogModule } from './activity-log/activity-log.module';
     OrderModule,
     RestockQueueModule,
     ActivityLogModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
