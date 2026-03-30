@@ -29,6 +29,7 @@ export class RestockQueue {
 }
 
 export const RestockQueueSchema = SchemaFactory.createForClass(RestockQueue);
-
-RestockQueueSchema.index({ priority: 1, stockAtTimeOfAdding: 1 });
-RestockQueueSchema.index({ product: 1 }, { unique: true });
+RestockQueueSchema.index({
+    priority: 1,
+    stockAtTimeOfAdding: 1,
+});

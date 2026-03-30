@@ -11,6 +11,7 @@ import { ActivityLogModule } from '../activity-log/activity-log.module';
 @Module({
   imports: [MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]), CategoryModule, forwardRef(() => RestockQueueModule), ActivityLogModule],
   providers: [ProductService, ProductRepository],
-  controllers: [ProductController,MongooseModule]
+  controllers: [ProductController],
+  exports: [ProductRepository, MongooseModule],
 })
 export class ProductModule { }

@@ -58,7 +58,6 @@ export class Order {
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
-OrderSchema.index({ status: 1 });
-OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ createdBy: 1, status: 1 });
 OrderSchema.index({ customerName: 'text' });
-OrderSchema.index({ createdBy: 1 });

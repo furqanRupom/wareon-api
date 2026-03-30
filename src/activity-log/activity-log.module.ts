@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityLogController } from './activity-log.controller';
 import { ActivityLogService } from './activity-log.service';
 import { ActivityLog, ActivityLogSchema } from './schemas/activity-log.schema';
+import { ActivityLogRepository } from './activity-log.repository';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { ActivityLog, ActivityLogSchema } from './schemas/activity-log.schema';
     ]),
   ],
   controllers: [ActivityLogController],
-  providers: [ActivityLogService],
+  providers: [ActivityLogService,ActivityLogRepository],
   exports: [ActivityLogService], 
 })
 export class ActivityLogModule { }
