@@ -5,6 +5,7 @@ export type ProductDocument = Product & Document;
 
 export enum ProductStatus {
     ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
     OUT_OF_STOCK = 'OUT_OF_STOCK',
 }
 
@@ -32,6 +33,9 @@ export class Product {
         default: ProductStatus.ACTIVE,
     })
     status: ProductStatus;
+    @Prop({ required: false })
+    sku?: string;
+
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

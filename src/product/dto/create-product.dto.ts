@@ -42,4 +42,8 @@ export class CreateProductDto {
     @IsEnum(ProductStatus)
     @IsOptional()
     status?: ProductStatus;
+
+    @IsOptional()
+    @IsString()
+    sku?: string;
 }

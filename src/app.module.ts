@@ -7,6 +7,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
+import { RestockQueueModule } from './restock-queue/restock-queue.module';
+import { ActivityLogModule } from './activity-log/activity-log.module';
 
 
 @Module({
@@ -28,6 +31,9 @@ import { ProductModule } from './product/product.module';
     AuthModule,
     CategoryModule,
     ProductModule,
+    OrderModule,
+    RestockQueueModule,
+    ActivityLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],
