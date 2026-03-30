@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Model } from 'mongoose';
 import { CreateCategoryDto } from './dto';
-import { generateSlug } from 'src/common/utils/slugify';
+import { generateSlug } from '../common/utils/slugify';
 
 @Injectable()
 export class CategoryRepository {
