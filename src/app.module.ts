@@ -6,10 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
-import { CategoryRepository } from './category/category.repository';
-import { AuthRepository } from './auth/auth.repository';
 import { ProductModule } from './product/product.module';
-import { ProductRepository } from './product/product.repository';
 
 
 @Module({
@@ -33,6 +30,6 @@ import { ProductRepository } from './product/product.repository';
     ProductModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CategoryRepository,AuthRepository, ProductRepository],
+  providers: [AppService],
 })
 export class AppModule {}
