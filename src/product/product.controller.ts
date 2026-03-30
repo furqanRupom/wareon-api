@@ -45,8 +45,6 @@ export class ProductController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Roles(UserRole.Manager)
     @Get(':id')
     async getProductById(@Param('id') id: string) {
         const result = await this.productService.getProductById(id);
