@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards, Query, Param, Patch, HttpCode, HttpStatus } from '@nestjs/common';
 import { CreateOrderDto, UpdateOrderItemsDto, UpdateOrderStatusDto, } from './dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guards';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
 import type { AuthRequest } from '../auth/types/auth-request.types';

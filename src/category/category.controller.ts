@@ -6,12 +6,13 @@ import { Roles } from '../common/decorators/roles.decorators';
 import { CreateCategoryDto } from './dto';
 
 @Controller('category')
+@UseGuards(JwtAuthGuard)
 export class CategoryController {
     constructor(
         private readonly categoryService: CategoryService
     ) {}
 
-    @UseGuards(JwtAuthGuard)
+  
     @Roles(UserRole.Manager)
     @Post()
     async createCategory(@Body() dto: CreateCategoryDto) {
@@ -23,7 +24,6 @@ export class CategoryController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Put(':id')
     async updateCategory(@Param('id') id: string, @Body() dto: CreateCategoryDto) {
@@ -34,7 +34,6 @@ export class CategoryController {
             data:result
         }
     }
-    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Delete(':id')
     async deleteCategory(@Param('id') id: string) {
@@ -45,7 +44,6 @@ export class CategoryController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Get('slug/:slug')
     async getCategoryBySlug(@Param('slug') slug: string) {
@@ -57,7 +55,6 @@ export class CategoryController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
     @Get()
     async getAllCategories() {
         const result = await this.categoryService.getAllCategories();

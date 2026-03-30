@@ -4,8 +4,8 @@ import { OrderController } from './order.controller';
 import { OrderRepository } from './order.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './schemas/order.schema';
-import { ProductModule } from 'src/product/product.module';
-import { ActivityLogModule } from 'src/activity-log/activity-log.module';
+import { ProductModule } from '../product/product.module';
+import { ActivityLogModule } from '../activity-log/activity-log.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Order.name, schema:OrderSchema }]),ProductModule,ActivityLogModule],
