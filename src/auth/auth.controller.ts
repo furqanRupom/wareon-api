@@ -4,6 +4,7 @@ import { ChangePasswordDto, CreateUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
 import type { AuthRequest } from './types/auth-request.types';
 
+
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
@@ -30,6 +31,7 @@ export class AuthController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     @Get('me')
     async profile(@Req() req: AuthRequest) {
