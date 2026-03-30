@@ -37,7 +37,7 @@ export class CreateProductDto {
 
     @IsOptional()
     @IsString()
-    productUrl?: string;
+    productUrl?: string[];
 
     @IsEnum(ProductStatus)
     @IsOptional()

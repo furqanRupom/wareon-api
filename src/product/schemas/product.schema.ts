@@ -27,7 +27,7 @@ export class Product {
     minStockThreshold: number;
 
     @Prop({ required: false })
-    productUrl: string;
+    productUrl?: string[];
     @Prop({
         enum: ProductStatus,
         default: ProductStatus.ACTIVE,
