@@ -8,13 +8,13 @@ import type { AuthRequest } from '../auth/types/auth-request.types';
 import { ProductStatus } from './schemas/product.schema';
 
 @Controller('product')
-@UseGuards(JwtAuthGuard)
+
 export class ProductController {
     constructor(
         private readonly productService: ProductService
     ) {}
 
-
+    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Post()
     async createProduct(@Body() dto: CreateProductDto, @Req() req : AuthRequest) {
@@ -26,6 +26,7 @@ export class ProductController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Put(':id')
     async updateProduct(@Param('id') id: string, @Body() dto: CreateProductDto) {
@@ -37,6 +38,7 @@ export class ProductController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Patch(':id/status')
     async updateStatus(@Param('id') id: string, @Body() status: { status: ProductStatus }, @Req() req: AuthRequest) {
@@ -48,6 +50,7 @@ export class ProductController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Patch(':id/restock')
     async restockProduct(@Param('id') id: string, @Body() dto: { quantity: number }, @Req() req: AuthRequest) {
@@ -58,6 +61,7 @@ export class ProductController {
             data:result
         }
     }
+    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Delete(':id')
     async deleteProduct(@Param('id') id: string) {
