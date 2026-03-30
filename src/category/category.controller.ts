@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guards';
-import { UserRole } from 'src/auth/enums/role.enum';
-import { Roles } from 'src/common/decorators/roles.decorators';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
+import { UserRole } from '../auth/enums/role.enum';
+import { Roles } from '../common/decorators/roles.decorators';
 import { CreateCategoryDto } from './dto';
 
 @Controller('category')
