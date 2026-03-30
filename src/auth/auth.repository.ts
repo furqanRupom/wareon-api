@@ -23,7 +23,7 @@ export class AuthRepository {
             nextNumber = lastNumber + 1;
         }
 
-        return `WERU-${nextNumber.toString().padStart(4, '0')}`;
+        return `WERX-${nextNumber.toString().padStart(4, '0')}`;
     }
 
     async createUser(dto: CreateUserDto): Promise<User> {
