@@ -34,7 +34,7 @@ export class AuthService {
             secret: this.configService.get<string>('secretRefreshToken'),
             expiresIn: this.configService.get<number>('refreshTokenExpiry'),
         })
-        return { user, accessToken, refreshToken };
+        return {accessToken, refreshToken };
     }
     async profile(userId: string) {
         const user = await this.authRepository.findOne(userId);

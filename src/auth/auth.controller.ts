@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ChangePasswordDto, CreateUserDto } from './dto';
+import { ChangePasswordDto, CreateUserDto, LoginUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
 import type { AuthRequest } from './types/auth-request.types';
 
@@ -22,7 +22,7 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() dto: CreateUserDto) {
+    async login(@Body() dto: LoginUserDto) {
         const result = await this.authService.loginUser(dto);
         return {
             success: true,
@@ -45,7 +45,7 @@ export class AuthController {
 
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @Put('profile/:id')
+    @Put('profile')
     async updateProfile(@Req() req: AuthRequest, @Body() updateData: Partial<CreateUserDto>) {
         const result = await this.authService.updateProfile(req.user.id, updateData);
         return {
