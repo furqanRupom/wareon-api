@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { ChangePasswordDto, CreateUserDto, LoginUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
 import type { AuthRequest } from './types/auth-request.types';
-import { setAuthCookies } from 'src/common/utils/cookie.util';
+import { setAuthCookies } from '../common/utils/cookie.util';
 import type { Response } from 'express';
 
 
