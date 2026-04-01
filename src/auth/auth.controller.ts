@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto, CreateUserDto, LoginUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
 import type { AuthRequest } from './types/auth-request.types';
+import { setAuthCookies } from 'src/common/utils/cookie.util';
+import type { Response } from 'express';
 
 
 @Controller('auth')
@@ -22,8 +24,9 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() dto: LoginUserDto) {
+    async login(@Body() dto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
         const result = await this.authService.loginUser(dto);
+        setAuthCookies(res, result.accessToken, result.refreshToken);
         return {
             success: true,
             message: 'User logged in successfully',
