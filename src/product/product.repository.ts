@@ -34,8 +34,33 @@ export class ProductRepository {
         return product;
     }
 
-    async findAll(): Promise<Product[]> {
-        return this.productModel.find().populate('category').exec();
+    async findAll(query: any): Promise<Product[]> {
+        const filter: any = {};
+
+    if (query.search) {
+        filter.name = { $regex: query.search, $options: "i" };
+    }
+
+    if (query.category) {
+        filter.category = query.category;
+    }
+
+    if (query.minPrice || query.maxPrice) {
+        filter.price = {};
+
+        if (query.minPrice) {
+            filter.price.$gte = Number(query.minPrice);
+        }
+
+        if (query.maxPrice) {
+            filter.price.$lte = Number(query.maxPrice);
+        }
+    }
+
+    return this.productModel
+        .find(filter)
+        .populate("category")
+        .exec();
     }
 
     async findById(id: string): Promise<Product | null> {

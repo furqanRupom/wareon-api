@@ -12,8 +12,8 @@ export class ProductService {
     async createProduct(userId: string, dto: CreateProductDto) {
         return await this.productRepository.createProduct(userId, dto);
     }
-    async getAllProducts() {
-        return await this.productRepository.findAll();
+    async getAllProducts(query:Record<string, unknown>) {
+        return await this.productRepository.findAll(query);
     }
     async getProductById(id: string) {
         return await this.productRepository.findById(id);

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 import { Roles } from '../common/decorators';
@@ -83,8 +83,8 @@ export class ProductController {
     }
 
     @Get()
-    async getAllProducts() {
-        const result = await this.productService.getAllProducts();
+    async getAllProducts(@Query() query: Record<string, unknown>) {
+        const result = await this.productService.getAllProducts(query);
         return {
             success:true,
             message:'Products fetched successfully',
