@@ -5,13 +5,14 @@ import { Model } from 'mongoose';
 import { CreateProductDto } from './dto';
 import { Category, CategoryDocument } from '../category/schemas/category.schema';
 import { RestockQueueService } from '../restock-queue/restock-queue.service';
+import { GetProductsDto } from './dto/get-products.dto';
 
 @Injectable()
 export class ProductRepository {
     constructor(
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
         @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-        private restockQueueService: RestockQueueService,   
+        private restockQueueService: RestockQueueService,
     ) { }
 
     async createProduct(userId: string, dto: CreateProductDto): Promise<Product> {
@@ -20,7 +21,7 @@ export class ProductRepository {
             throw new NotFoundException('Category not found');
         }
         const createdProduct = new this.productModel(dto);
-        
+
         const product = await createdProduct.save();
         if (product.stock < product.minStockThreshold) {
             await this.restockQueueService.addIfNeeded(
@@ -34,51 +35,51 @@ export class ProductRepository {
         return product;
     }
 
-    async findAll(query: any): Promise<Product[]> {
+    async findAll(query: any): Promise<GetProductsDto> {
         const filter: any = {};
         const page = Number(query.page) || 1
         const limit = Number(query.limit) || 10
-        const skip = (page -1 ) * limit 
-    if (query.search) {
-        filter.name = { $regex: query.search, $options: "i" };
-    }
-
-    if (query.category) {
-        filter.category = query.category;
-    }
-
-    if (query.minPrice || query.maxPrice) {
-        filter.price = {};
-
-        if (query.minPrice) {
-            filter.price.$gte = Number(query.minPrice);
+        const skip = (page - 1) * limit
+        if (query.search) {
+            filter.name = { $regex: query.search, $options: "i" };
         }
 
-        if (query.maxPrice) {
-            filter.price.$lte = Number(query.maxPrice);
+        if (query.category) {
+            filter.category = query.category;
         }
-    }
-       
 
-    const data = await this.productModel
-        .find(filter)
-        .populate("category")
-        .skip(skip)
-        .limit(limit)
-        .exec();
+        if (query.minPrice || query.maxPrice) {
+            filter.price = {};
 
-    const total = await this.productModel.countDocuments(filter);
+            if (query.minPrice) {
+                filter.price.$gte = Number(query.minPrice);
+            }
 
-    return {
-        meta: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-        },
-        data,
-    };
-    
+            if (query.maxPrice) {
+                filter.price.$lte = Number(query.maxPrice);
+            }
+        }
+
+
+        const data = await this.productModel
+            .find(filter)
+            .populate("category")
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        const total = await this.productModel.countDocuments(filter);
+
+        return {
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+            data,
+        };
+
     }
 
     async findById(id: string): Promise<Product | null> {

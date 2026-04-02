@@ -88,7 +88,8 @@ export class ProductController {
         return {
             success:true,
             message:'Products fetched successfully',
-            data:result
+            meta:result.meta,
+            data:result.data
         }
     }
 }
