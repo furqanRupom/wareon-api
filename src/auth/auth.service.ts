@@ -24,7 +24,7 @@ export class AuthService {
         if(!isPasswordValid) {
             throw new NotFoundException('Invalid credentials')
         };
-        const payload = { id: user.userId, email: user.email, role: user.role };
+        const payload = { id: user.userId,name: user.name, email: user.email, role: user.role };
         const accessToken = await this.jwtService.signAsync(payload, {
             secret: this.configService.get<string>('secretAccessToken'),
             expiresIn: this.configService.get<number>('accessTokenExpiry'),
