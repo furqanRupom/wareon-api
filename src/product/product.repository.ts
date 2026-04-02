@@ -36,7 +36,9 @@ export class ProductRepository {
 
     async findAll(query: any): Promise<Product[]> {
         const filter: any = {};
-
+        const page = Number(query.page) || 1
+        const limit = Number(query.limit) || 10
+        const skip = (page -1 ) * limit 
     if (query.search) {
         filter.name = { $regex: query.search, $options: "i" };
     }
@@ -56,11 +58,27 @@ export class ProductRepository {
             filter.price.$lte = Number(query.maxPrice);
         }
     }
+       
 
-    return this.productModel
+    const data = await this.productModel
         .find(filter)
         .populate("category")
+        .skip(skip)
+        .limit(limit)
         .exec();
+
+    const total = await this.productModel.countDocuments(filter);
+
+    return {
+        meta: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        },
+        data,
+    };
+    
     }
 
     async findById(id: string): Promise<Product | null> {
