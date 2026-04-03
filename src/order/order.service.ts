@@ -121,7 +121,7 @@ export class OrderService {
         }
 
         const page = Number(filters.page) || 1;
-        const limit = Math.min(Number(filters.limit) || 10, 100);
+        const limit = Number(filters.limit) || 10;
         const skip = (page - 1) * limit;
 
         const total = await this.ordersRepository.count(query);
@@ -160,7 +160,7 @@ export class OrderService {
         }
 
         const page = Number(filters.page) || 1;
-        const limit = Math.min(Number(filters.limit) || 10, 100);
+        const limit = Number(filters.limit) || 10;
         const skip = (page - 1) * limit;
 
         const total = await this.ordersRepository.count(query);
