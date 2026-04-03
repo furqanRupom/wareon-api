@@ -1,4 +1,5 @@
 import {
+    IsArray,
     IsEnum,
     IsMongoId,
     IsNotEmpty,
@@ -36,7 +37,8 @@ export class CreateProductDto {
     minStockThreshold?: number;
 
     @IsOptional()
-    @IsString()
+    @IsArray()
+    @IsString({ each: true })
     productUrl?: string[];
 
     @IsEnum(ProductStatus)
