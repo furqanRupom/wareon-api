@@ -33,7 +33,7 @@ export class CategoryRepository {
 
         
 
-        const total = await this.categoryModel.countDocuments(query);
+        const total = await this.categoryModel.countDocuments(filter);
 
         const data = await this.categoryModel
             .find(filter)
