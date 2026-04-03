@@ -18,23 +18,25 @@ export class CategoryRepository {
     }
 
     async findAll(query:Record<string,any>): Promise<GetCategoryDto> {
+        const filter:any = {}
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10
+        const skip = (page - 1) * limit;
 
         if (query.search) {
-            query.name = { $regex: query.search, $options: "i" };
+            filter.name = { $regex: filter.search, $options: "i" };
         }
 
         if (query.isActive !== undefined) {
-            query.isActive = query.isActive === "true" || query.isActive === true;
+            filter.isActive = filter.isActive === "true" || filter.isActive === true;
         }
 
-        const page = Number(query.page) || 1;
-        const limit = Math.min(Number(query.limit) || 10, 100);
-        const skip = (page - 1) * limit;
+        
 
         const total = await this.categoryModel.countDocuments(query);
 
         const data = await this.categoryModel
-            .find(query)
+            .find(filter)
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })

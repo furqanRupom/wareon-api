@@ -66,6 +66,7 @@ export class ProductRepository {
             .populate("category")
             .skip(skip)
             .limit(limit)
+            .sort({createdAt: -1})
             .exec();
 
         const total = await this.productModel.countDocuments(filter);
