@@ -3,7 +3,7 @@ import { ProductService } from './product.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
-import { CreateProductDto } from './dto';
+import { CreateProductDto, UpdateProductDto } from './dto';
 import type { AuthRequest } from '../auth/types/auth-request.types';
 import { ProductStatus } from './schemas/product.schema';
 
@@ -29,7 +29,7 @@ export class ProductController {
     @UseGuards(JwtAuthGuard)
     @Roles(UserRole.Manager)
     @Put(':id')
-    async updateProduct(@Param('id') id: string, @Body() dto: CreateProductDto) {
+    async updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
         const result = await this.productService.updateProduct(id, dto);
         return {
             success:true,

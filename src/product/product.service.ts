@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
-import { CreateProductDto } from './dto';
+import { CreateProductDto, UpdateProductDto } from './dto';
 import { ProductStatus } from './schemas/product.schema';
 import { GetProductsDto } from './dto/get-products.dto';
 
@@ -19,7 +19,7 @@ export class ProductService {
     async getProductById(id: string) {
         return await this.productRepository.findById(id);
     }
-    async updateProduct(id: string, dto: CreateProductDto) {
+    async updateProduct(id: string, dto: UpdateProductDto) {
         return await this.productRepository.updateProduct(id, dto);
     }
 

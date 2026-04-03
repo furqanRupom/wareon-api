@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Product, ProductDocument, ProductStatus } from './schemas/product.schema';
 import { Model } from 'mongoose';
-import { CreateProductDto } from './dto';
+import { CreateProductDto, UpdateProductDto } from './dto';
 import { Category, CategoryDocument } from '../category/schemas/category.schema';
 import { RestockQueueService } from '../restock-queue/restock-queue.service';
 import { GetProductsDto } from './dto/get-products.dto';
@@ -86,7 +86,7 @@ export class ProductRepository {
         return this.productModel.findById(id).populate('category').exec();
     }
 
-    async updateProduct(id: string, dto: CreateProductDto): Promise<Product | null> {
+    async updateProduct(id: string, dto: UpdateProductDto): Promise<Product | null> {
         const category = await this.categoryModel.findById(dto.category).exec();
         if (!category) {
             throw new NotFoundException('Category not found');
