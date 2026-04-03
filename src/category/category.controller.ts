@@ -61,7 +61,9 @@ export class CategoryController {
         return {
             success: true,
             message: 'Categories fetched successfully',
-            data: result
+            meta:result.meta,
+            data: result.data
+
         }
     }
 }
