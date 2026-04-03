@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { OrderDocument, OrderStatus } from "./schemas/order.schema";
 import { ActivityLogService } from "../activity-log/activity-log.service";
 import { LogAction } from "../activity-log/schemas/activity-log.schema";
+import { AuthRepository } from "src/auth/auth.repository";
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
@@ -29,6 +30,7 @@ export class OrderService {
         private readonly ordersRepository: OrderRepository,
         private readonly productRepository: ProductRepository,
         private readonly activityLogService: ActivityLogService,
+        private readonly authRepository: AuthRepository
     ) { }
 
     async create(dto: CreateOrderDto, userId: string) {
@@ -84,25 +86,28 @@ export class OrderService {
             await this.productRepository.deductStock(item.productId, item.quantity);
         }
 
+        const user = await this.authRepository.findOne(userId)
+        if (!user) {
+            throw new NotFoundException("User not found")
+        }
         const order = await this.ordersRepository.create({
             customerName: dto.customerName,
             items: orderItems,
             totalPrice,
             notes: dto.notes || '',
             status: OrderStatus.PENDING,
-            createdBy: new Types.ObjectId(userId),
+            createdBy: new Types.ObjectId(user._id),
         });
 
         await this.activityLogService.log({
             action: LogAction.ORDER_CREATED,
             entity: 'order',
             entityId: order._id.toString(),
-            userId,
         });
 
         return order;
     }
-    async findAll(filters: Record<string, any>):Promise<GetOrdersDto> {
+    async findAll(filters: Record<string, any>): Promise<GetOrdersDto> {
         const query: any = {};
 
         // Filters
@@ -140,7 +145,7 @@ export class OrderService {
             data,
         };
     }
-    async findAllByUser(userId: string, filters: Record<string, any>):Promise<GetOrdersDto> {
+    async findAllByUser(userId: string, filters: Record<string, any>): Promise<GetOrdersDto> {
         const query: any = {
             createdBy: new Types.ObjectId(userId),
         };
@@ -183,7 +188,7 @@ export class OrderService {
         if (!order) throw new NotFoundException('Order not found');
         return order;
     }
-    async updateStatus(id: string, dto: UpdateOrderStatusDto,userId:string) {
+    async updateStatus(id: string, dto: UpdateOrderStatusDto, userId: string) {
         const order = await this.ordersRepository.findById(id);
         if (!order) throw new NotFoundException('Order not found');
 
@@ -200,12 +205,11 @@ export class OrderService {
             action: STATUS_TO_LOG_ACTION[dto.status],
             entity: 'order',
             entityId: id,
-            userId,
         });
 
         return order;
     }
-    async cancel(id: string,userId:string) {
+    async cancel(id: string, userId: string) {
         const order = await this.ordersRepository.findById(id);
         if (!order) throw new NotFoundException('Order not found');
 
@@ -231,7 +235,6 @@ export class OrderService {
             action: LogAction.ORDER_CANCELLED,
             entity: 'order',
             entityId: id,
-            userId,
             meta: { customerName: order.customerName },
         });
 
@@ -240,7 +243,7 @@ export class OrderService {
     async updateItems(
         id: string,
         dto: UpdateOrderItemsDto,
-        userId:string
+        userId: string
     ): Promise<OrderDocument> {
         const order = await this.ordersRepository.findById(id);
         if (!order) throw new NotFoundException('Order not found');
@@ -332,7 +335,6 @@ export class OrderService {
             action: LogAction.ORDER_ITEMS_UPDATED,
             entity: 'order',
             entityId: id,
-            userId,
             meta: { customerName: order.customerName },
         });
 

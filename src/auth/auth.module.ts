@@ -13,6 +13,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [JwtModule.register({}), PassportModule.register({ defaultStrategy: 'jwt' }), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
   providers: [AuthService, AuthRepository,JwtStrategy,JwtAuthGuard],
   controllers: [AuthController],
-  exports: [AuthService, JwtAuthGuard]
+  exports: [AuthService, AuthRepository,JwtAuthGuard]
 })
 export class AuthModule {}

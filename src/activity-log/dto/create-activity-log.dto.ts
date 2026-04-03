@@ -21,8 +21,9 @@ export class CreateActivityLogDto {
     @IsNotEmpty()
     entityId: string;
 
+    @IsOptional()
     @IsMongoId({ message: 'Invalid userId format' })
-    userId: string;
+    userId?: string;
 
     @IsOptional()
     @IsObject()
