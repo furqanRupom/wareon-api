@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Model } from 'mongoose';
-import { CreateCategoryDto } from './dto';
+import { CreateCategoryDto, GetCategoryDto } from './dto';
 import { generateSlug } from '../common/utils/slugify';
 
 @Injectable()
@@ -17,8 +17,40 @@ export class CategoryRepository {
         return createdCategory.save();
     }
 
-    async findAll(): Promise<Category[]> {
-        return this.categoryModel.find().exec();
+    async findAll(query:Record<string,any>): Promise<GetCategoryDto> {
+
+        if (query.search) {
+            query.name = { $regex: query.search, $options: "i" };
+        }
+
+        if (query.isActive !== undefined) {
+            query.isActive = query.isActive === "true" || query.isActive === true;
+        }
+
+        const page = Number(query.page) || 1;
+        const limit = Math.min(Number(query.limit) || 10, 100);
+        const skip = (page - 1) * limit;
+
+        const total = await this.categoryModel.countDocuments(query);
+
+        const data = await this.categoryModel
+            .find(query)
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 })
+            .exec();
+
+        const meta = {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+
+        return {
+            meta,
+            data,
+        };
     }
 
     async findById(id: string): Promise<Category | null> {

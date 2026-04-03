@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 import { UserRole } from '../auth/enums/role.enum';
@@ -56,8 +56,8 @@ export class CategoryController {
     }
 
     @Get()
-    async getAllCategories() {
-        const result = await this.categoryService.getAllCategories();
+    async getAllCategories(@Query() query:Record<string,unknown> ) {
+        const result = await this.categoryService.getAllCategories(query);
         return {
             success: true,
             message: 'Categories fetched successfully',

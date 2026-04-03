@@ -13,8 +13,8 @@ export class OrderController {
 
     @Roles(UserRole.User)
     @Post()
-    create(@Body() dto: CreateOrderDto, @Req() req: AuthRequest) {
-        const result = this.orderService.create(dto, req.user.id);
+    async create(@Body() dto: CreateOrderDto, @Req() req: AuthRequest) {
+        const result = await  this.orderService.create(dto, req.user.id);
         return {
             success: true,
             message: 'Order created successfully',
@@ -22,35 +22,33 @@ export class OrderController {
         }
     }
 
-    @Roles(UserRole.User)
+    @Roles(UserRole.User,UserRole.Manager)
     @Get()
-    findAll(
-        @Query('status') status?: string,
-        @Query('date') date?: string,
-        @Query('search') search?: string,
+    async findAll(
+        @Query() query:Record<string,unknown>
     ) {
-        const result = this.orderService.findAll({ status, date, search });
+        const result = await this.orderService.findAll(query);
         return {
             success: true,
             message: 'Orders fetched successfully',
-            data: result
+            meta:result.meta,
+            data: result.data
         }
     }
 
 
     @Roles(UserRole.User)
     @Get('user')
-    findAllByUser(
+    async findAllByUser(
         @Req() req: AuthRequest,
-        @Query('status') status?: string,
-        @Query('date') date?: string,
-        @Query('search') search?: string,
+        @Query() query: Record<string, unknown>
     ) {
-        const result = this.orderService.findAllByUser(req.user.id, { status, date, search });
+        const result = await this.orderService.findAllByUser(req.user.id, query);
         return {
             success: true,
             message: 'Orders fetched successfully',
-            data: result
+            meta:result.meta,
+            data: result.data
         }
     }
 
@@ -58,8 +56,8 @@ export class OrderController {
 
     @Roles(UserRole.User,UserRole.Manager,UserRole.Admin)
     @Get('today')
-    findToday() {
-        const result =  this.orderService.revenueToday();
+    async findToday() {
+        const result = await this.orderService.revenueToday();
         return {
             success: true,
             message: 'Today\'s revenue fetched successfully',
@@ -70,8 +68,8 @@ export class OrderController {
 
     @Roles(UserRole.User,UserRole.Manager,UserRole.Admin)
     @Get('revenue/today')
-    revenueToday() {
-        const result = this.orderService.revenueToday();
+    async revenueToday() {
+        const result = await this.orderService.revenueToday();
         return {
             success: true,
             message: 'Today\'s revenue fetched successfully',
@@ -82,8 +80,8 @@ export class OrderController {
 
     @Roles(UserRole.User, UserRole.Manager, UserRole.Admin)
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        const result = this.orderService.findOne(id);
+    async findOne(@Param('id') id: string) {
+        const result = await this.orderService.findOne(id);
         return {
             success: true,
             message: 'Order fetched successfully',
@@ -95,12 +93,12 @@ export class OrderController {
 
     @Roles(UserRole.User, UserRole.Manager, UserRole.Admin)
     @Patch(':id/status')
-    updateStatus(
+    async updateStatus(
         @Param('id') id: string,
         @Body() dto: UpdateOrderStatusDto,
         @Req() req: AuthRequest
     ) {
-        const result = this.orderService.updateStatus(id, dto, req.user.id);
+        const result = await this.orderService.updateStatus(id, dto, req.user.id);
         return {
             success: true,
             message: 'Order status updated successfully',
@@ -113,8 +111,8 @@ export class OrderController {
     @Roles(UserRole.User, UserRole.Manager, UserRole.Admin)
     @Patch(':id/cancel')
     @HttpCode(HttpStatus.OK)
-    cancel(@Param('id') id: string, @Req() req: AuthRequest) {
-        const result = this.orderService.cancel(id,req.user.id);
+    async cancel(@Param('id') id: string, @Req() req: AuthRequest) {
+        const result = await this.orderService.cancel(id,req.user.id);
         return {
             success: true,
             message: 'Order cancelled successfully',
@@ -124,15 +122,14 @@ export class OrderController {
 
 
 
-    @UseGuards(JwtAuthGuard)
     @Roles(UserRole.User, UserRole.Manager, UserRole.Admin)
     @Patch(':id/items')
-    updateItems(
+    async updateItems(
         @Param('id') id: string,
         @Body() dto: UpdateOrderItemsDto,
         @Req() req: AuthRequest
     ) {
-        const result = this.orderService.updateItems(id, dto,req.user.id);
+        const result = await this.orderService.updateItems(id, dto,req.user.id);
         return {
             success: true,
             message: 'Order items updated successfully',

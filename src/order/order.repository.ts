@@ -13,13 +13,16 @@ export class OrderRepository {
         return this.orderModel.create(data);
     }
 
-    async findAll(query: any): Promise<Order[]> {
+    async findAll(query: Record<string,unknown>, options?: { skip?: number; limit?: number }) {
         return this.orderModel
             .find(query)
-            .sort({ createdAt: -1 })
-            .populate('createdBy', 'name email')
-            .lean()
-            .exec();
+            .skip(options?.skip || 0)
+            .limit(options?.limit || 10)
+            .sort({ createdAt: -1 });
+    }
+
+    async count(query: any) {
+        return this.orderModel.countDocuments(query);
     }
 
     async findToday(start: Date, end: Date): Promise<Order[]> {

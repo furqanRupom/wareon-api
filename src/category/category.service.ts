@@ -10,8 +10,8 @@ export class CategoryService {
     async createCategory(dto: CreateCategoryDto) {
         return this.categoryRepository.createCategory(dto);
     }
-    async getAllCategories() {
-        return this.categoryRepository.findAll();
+    async getAllCategories(query:Record<string,unknown>) {
+        return this.categoryRepository.findAll(query);
     }
     async getCategoryById(id: string) {
         return this.categoryRepository.findById(id);

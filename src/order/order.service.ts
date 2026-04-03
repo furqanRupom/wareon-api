@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { OrderRepository } from "./order.repository";
-import { CreateOrderDto, UpdateOrderItemsDto, UpdateOrderStatusDto } from "./dto";
+import { CreateOrderDto, GetOrdersDto, UpdateOrderItemsDto, UpdateOrderStatusDto } from "./dto";
 import { ProductRepository } from "../product/product.repository";
 import { Types } from "mongoose";
 import { OrderDocument, OrderStatus } from "./schemas/order.schema";
@@ -102,9 +102,10 @@ export class OrderService {
 
         return order;
     }
-    async findAll(filters: Record<string, any>) {
+    async findAll(filters: Record<string, any>):Promise<GetOrdersDto> {
         const query: any = {};
 
+        // Filters
         if (filters.status) query.status = filters.status;
 
         if (filters.search) {
@@ -119,10 +120,30 @@ export class OrderService {
             query.createdAt = { $gte: start, $lt: end };
         }
 
-        return this.ordersRepository.findAll(query);
+        const page = Number(filters.page) || 1;
+        const limit = Math.min(Number(filters.limit) || 10, 100);
+        const skip = (page - 1) * limit;
+
+        const total = await this.ordersRepository.count(query);
+
+        const data = await this.ordersRepository.findAll(query, { skip, limit });
+
+        const meta = {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+
+        return {
+            meta,
+            data,
+        };
     }
-    async findAllByUser(userId: string, filters: Record<string, any>) {
-        const query: any = { createdBy: new Types.ObjectId(userId) };
+    async findAllByUser(userId: string, filters: Record<string, any>):Promise<GetOrdersDto> {
+        const query: any = {
+            createdBy: new Types.ObjectId(userId),
+        };
 
         if (filters.status) query.status = filters.status;
 
@@ -138,7 +159,24 @@ export class OrderService {
             query.createdAt = { $gte: start, $lt: end };
         }
 
-        return this.ordersRepository.findAll(query);
+        const page = Number(filters.page) || 1;
+        const limit = Math.min(Number(filters.limit) || 10, 100);
+        const skip = (page - 1) * limit;
+
+        const total = await this.ordersRepository.count(query);
+        const data = await this.ordersRepository.findAll(query, { skip, limit });
+
+        const meta = {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+
+        return {
+            meta,
+            data,
+        };
     }
     async findOne(id: string) {
         const order = await this.ordersRepository.findById(id);
