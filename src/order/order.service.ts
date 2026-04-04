@@ -146,8 +146,12 @@ export class OrderService {
         };
     }
     async findAllByUser(userId: string, filters: Record<string, any>): Promise<GetOrdersDto> {
+        const user = await this.authRepository.findOne(userId)
+        if(!user){
+            throw new NotFoundException('User not found!')
+        }
         const query: any = {
-            createdBy: new Types.ObjectId(userId),
+            createdBy: new Types.ObjectId(user._id),
         };
 
         if (filters.status) query.status = filters.status;
