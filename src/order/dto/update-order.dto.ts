@@ -9,6 +9,7 @@ export class UpdateOrderStatusDto {
 }
 
 export class UpdateOrderItemsDto {
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })
