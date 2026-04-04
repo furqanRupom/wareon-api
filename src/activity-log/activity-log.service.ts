@@ -75,7 +75,7 @@ export class ActivityLogService {
 
         switch (action) {
             case LogAction.ORDER_CREATED:
-                return `Order #${shortId} created for ${user.name}`;
+                return `Order #${shortId} created`;
             case LogAction.ORDER_CONFIRMED:
                 return `Order #${shortId} confirmed`;
             case LogAction.ORDER_SHIPPED:
