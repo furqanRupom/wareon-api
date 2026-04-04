@@ -8,8 +8,8 @@ A robust e-commerce backend API built with NestJS and MongoDB.
 - **Database:** MongoDB with Mongoose
 - **Package Manager:** pnpm
 - **Authentication:** JWT
-- **Validation:** Zod + Class Validator
-- **Caching:** Next.js Cache Revalidation
+- **Validation:** Class Validator
+
 
 ## Features
 
