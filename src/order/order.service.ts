@@ -103,6 +103,7 @@ export class OrderService {
             action: LogAction.ORDER_CREATED,
             entity: 'order',
             entityId: order._id.toString(),
+            userId:user._id as unknown as string
         });
 
         return order;

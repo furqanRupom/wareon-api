@@ -13,7 +13,7 @@ export class ActivityLogService {
     ) { }
 
     async log(dto: CreateActivityLogDto): Promise<void> {
-        await this.activityLogRepository.create({
+       await this.activityLogRepository.create({
             action: dto.action,
             entity: dto.entity,
             entityId: dto.entityId,
@@ -31,12 +31,11 @@ export class ActivityLogService {
 
         const limit = Math.min(filters.limit ?? 10, 50);
 
-        return this.activityLogRepository.findAll(query, limit);
+        return await this.activityLogRepository.findAll(query, limit);
     }
 
     async findAllFormatted(filters: { limit?: number; entity?: string }) {
         const logs = await this.findAll(filters);
-
         return logs.map((log) => {
             const user = (log.userId as any)?.name ?? 'System';
 
@@ -48,6 +47,7 @@ export class ActivityLogService {
             const summary = this.buildSummary(
                 log.action as LogAction,
                 log.meta,
+                user,
                 log.entityId,
             );
 
@@ -68,13 +68,14 @@ export class ActivityLogService {
     private buildSummary(
         action: LogAction,
         meta: Record<string, any>,
+        user:any,
         entityId: string,
     ): string {
         const shortId = entityId.slice(-6).toUpperCase();
 
         switch (action) {
             case LogAction.ORDER_CREATED:
-                return `Order #${shortId} created for ${meta.customerName} — $${meta.totalPrice?.toFixed(2)}`;
+                return `Order #${shortId} created for ${user.name}`;
             case LogAction.ORDER_CONFIRMED:
                 return `Order #${shortId} confirmed`;
             case LogAction.ORDER_SHIPPED:
@@ -85,20 +86,6 @@ export class ActivityLogService {
                 return `Order #${shortId} cancelled — stock restored`;
             case LogAction.ORDER_ITEMS_UPDATED:
                 return `Order #${shortId} items updated`;
-            case LogAction.PRODUCT_CREATED:
-                return `Product "${meta.name}" added`;
-            case LogAction.PRODUCT_RESTOCKED:
-                return `Stock updated for "${meta.name}" (+${meta.quantity} units)`;
-            case LogAction.PRODUCT_DEACTIVATED:
-                return `Product "${meta.name}" deactivated`;
-            case LogAction.RESTOCK_QUEUE_ADDED:
-                return `"${meta.name}" added to Restock Queue`;
-            case LogAction.RESTOCK_QUEUE_REMOVED:
-                return `"${meta.name}" removed from Restock Queue`;
-            case LogAction.CATEGORY_CREATED:
-                return `Category "${meta.name}" created`;
-            case LogAction.CATEGORY_DELETED:
-                return `Category "${meta.name}" deleted`;
             default:
                 return `${action.replace(/_/g, ' ').toLowerCase()} — #${shortId}`;
         }

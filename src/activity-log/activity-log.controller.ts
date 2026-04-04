@@ -8,11 +8,11 @@ export class ActivityLogController {
     constructor(private readonly activityLogService: ActivityLogService) { }
 
     @Get()
-    findAll(
+   async findAll(
         @Query('limit') limit?: number,
         @Query('entity') entity?: string,
     ) {
-        const result = this.activityLogService.findAll({ limit, entity });
+        const result = await this.activityLogService.findAllFormatted({ limit, entity });
         return {
             success: true,
             message: 'Activity logs fetched successfully',
