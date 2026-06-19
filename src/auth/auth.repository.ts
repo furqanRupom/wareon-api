@@ -36,8 +36,15 @@ export class AuthRepository {
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
-  async updateUser(userId:string, dto: Partial<UpdateUserDto>) {
-    return await this.userModel.findOneAndUpdate({userId},dto,{new:true})
+  async updateUser(userId: string, dto: Partial<UpdateUserDto>) {
+    return await this.userModel.findOneAndUpdate(
+      { userId },
+      { $set: dto },
+      {
+        returnDocument: 'after',
+        runValidators: true
+      }
+    )
   }
 
   async findById(id: string): Promise<UserDocument | null> {
