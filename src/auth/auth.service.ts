@@ -50,7 +50,7 @@ export class AuthService {
             throw new NotFoundException('User not found');
         }
         const result = await this.authRepository.updateUser(userId,updateData)
-        return result;
+        return user;
     }
     async changePassword(userId: string, dto:ChangePasswordDto) {
         const user = await this.authRepository.findOne(userId);

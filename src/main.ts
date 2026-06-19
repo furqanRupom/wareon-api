@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser())
-  await app.listen(3000);
+  await app.listen(8080);
 }
 
 bootstrap();
