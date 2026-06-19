@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/auth.schema';
 import { CreateUserDto } from './dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -34,6 +35,9 @@ export class AuthRepository {
 
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
+  }
+  async updateUser(userId:string, dto: Partial<UpdateUserDto>) {
+    return await this.userModel.findByIdAndUpdate(userId,dto,{new:true})
   }
 
   async findById(id: string): Promise<UserDocument | null> {
