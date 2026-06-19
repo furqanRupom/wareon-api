@@ -41,7 +41,7 @@ export class AuthRepository {
       { userId },
       { $set: dto },
       {
-        returnDocument: 'after',
+        returnDocument: "after",
         runValidators: true
       }
     )
