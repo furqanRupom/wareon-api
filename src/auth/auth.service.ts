@@ -3,6 +3,7 @@ import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { ConfigService } from '@nestjs/config';
 import { ChangePasswordDto, CreateUserDto, LoginUserDto } from './dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +44,7 @@ export class AuthService {
         }
         return user;
     }
-    async updateProfile(userId: string, updateData: Partial<CreateUserDto>) {
+    async updateProfile(userId: string, updateData: Partial<UpdateUserDto>) {
         const user = await this.authRepository.findOne(userId);
         if (!user) {
             throw new NotFoundException('User not found');
@@ -64,5 +65,9 @@ export class AuthService {
         user.password = dto.newPassword;
         await user.save();
         return null
+    }
+
+    async deleteMyAccount(userId:string) {
+        return await this.authRepository.findOneAndDelete(userId)
     }
 }

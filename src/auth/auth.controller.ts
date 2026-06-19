@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto, CreateUserDto, LoginUserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guards';
 import type { AuthRequest } from './types/auth-request.types';
 import { setAuthCookies } from '../common/utils/cookie.util';
 import type { Response } from 'express';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 
 @Controller('auth')
@@ -49,7 +50,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     @Put('profile')
-    async updateProfile(@Req() req: AuthRequest, @Body() updateData: Partial<CreateUserDto>) {
+    async updateProfile(@Req() req: AuthRequest, @Body() updateData: Partial<UpdateUserDto>) {
         const result = await this.authService.updateProfile(req.user.id, updateData);
         return {
             success: true,
@@ -70,4 +71,15 @@ export class AuthController {
         }
     }
 
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Delete('delete-account')
+    async deleteMyAccount(@Req() req: AuthRequest) {
+         await this.authService.deleteMyAccount(req.user.id);
+        return {
+            success: true,
+            message: 'User deleted successfully',
+            data: null
+        }
+    }
 }

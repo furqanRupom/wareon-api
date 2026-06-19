@@ -6,41 +6,46 @@ import { CreateUserDto } from './dto';
 
 @Injectable()
 export class AuthRepository {
-    
-    constructor(
-        @InjectModel(User.name) private userModel: Model<UserDocument>,
-    ) {}
-    private async generateUserId(): Promise<string> {
-        const lastUser = await this.userModel
-            .findOne()
-            .sort({ createdAt: -1 })
-            .lean();
 
-        let nextNumber = 1;
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) { }
+  private async generateUserId(): Promise<string> {
+    const lastUser = await this.userModel
+      .findOne()
+      .sort({ createdAt: -1 })
+      .lean();
 
-        if (lastUser?.userId) {
-            const lastNumber = parseInt(lastUser.userId.split('-')[1], 10);
-            nextNumber = lastNumber + 1;
-        }
+    let nextNumber = 1;
 
-        return `WERX-${nextNumber.toString().padStart(4, '0')}`;
+    if (lastUser?.userId) {
+      const lastNumber = parseInt(lastUser.userId.split('-')[1], 10);
+      nextNumber = lastNumber + 1;
     }
 
-    async createUser(dto: CreateUserDto): Promise<User> {
-        const userId = await this.generateUserId();
-        const createUser = await this.userModel.create({ ...dto, userId });
-        return createUser.toObject();
-    }
+    return `WERX-${nextNumber.toString().padStart(4, '0')}`;
+  }
 
-    async findByEmail(email: string): Promise<UserDocument | null> {
-        return this.userModel.findOne({ email }).exec();
-    }
+  async createUser(dto: CreateUserDto): Promise<User> {
+    const userId = await this.generateUserId();
+    const createUser = await this.userModel.create({ ...dto, userId });
+    return createUser.toObject();
+  }
 
-    async findById(id: string): Promise<UserDocument | null> {
-        return this.userModel.findById(id).exec();
-    }
-    async findOne(userId: string): Promise<UserDocument | null> {
-        return this.userModel.findOne({ userId }).exec();
-    }
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email }).exec();
+  }
+
+  async findById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).exec();
+  }
+  async findOne(userId: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ userId }).exec();
+  }
+  async findOneAndDelete(userId: string) {
+    return await this.userModel.findByIdAndUpdate(userId, {
+      isDeleted: true
+    }, { new: true })
+  }
 
 }
