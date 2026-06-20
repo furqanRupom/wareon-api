@@ -6,6 +6,7 @@ import { UserRole } from '../auth/enums/role.enum';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import type { AuthRequest } from '../auth/types/auth-request.types';
 import { ProductStatus } from './schemas/product.schema';
+import { GetProductsQueryDto } from './dto/get-products.dto';
 
 @Controller('product')
 
@@ -83,7 +84,7 @@ export class ProductController {
     }
 
     @Get()
-    async getAllProducts(@Query() query: Record<string, unknown>) {
+    async getAllProducts(@Query() query: GetProductsQueryDto) {
         const result = await this.productService.getAllProducts(query);
         return {
             success:true,
