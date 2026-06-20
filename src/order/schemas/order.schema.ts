@@ -29,7 +29,8 @@ export class OrderItem {
     unitPrice: number; 
 
     @Prop({ required: true, min: 0 })
-    subtotal: number; 
+    subtotal: number;
+
 }
 
 export const OrderItemSchema = SchemaFactory.createForClass(OrderItem);
@@ -83,6 +84,9 @@ export class Order {
 
     @Prop({ required: true, min: 0, default: 0 })
     deliveryFee: number;
+
+    @Prop({required:true, min:0})
+    tax:number
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
