@@ -1,8 +1,9 @@
-import { Controller, Get, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, ParseIntPipe, Query, Req, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 import { UserRole } from '../auth/enums/role.enum';
 import { Roles } from '../common/decorators';
+import type { AuthRequest } from '../auth/types/auth-request.types';
 
 @Controller('dashboard')
 @UseGuards(JwtAuthGuard)
@@ -129,4 +130,19 @@ export class DashboardController {
             data: result,
         };
     }
+
+    @Get('recent-orders')
+    async getRecentOrders(
+        @Req() req: AuthRequest,
+        @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    ) {
+        const userId = req.user.role === UserRole.Manager ? undefined : req.user.id;
+
+        const result = await this.dashboardService.getRecentOrders(limit ?? 5, userId);
+        return {
+            success: true,
+            message: 'Recent orders fetched successfully',
+            data: result,
+        };
+    }    
 }
