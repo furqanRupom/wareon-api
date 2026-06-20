@@ -11,6 +11,9 @@ export enum OrderStatus {
     CANCELLED = 'cancelled',
 }
 
+export enum PaymentMethod {
+    COD = 'COD',
+}
 @Schema({ _id: false })
 export class OrderItem {
     @Prop({ type: Types.ObjectId, ref: 'Product', required: true })
@@ -54,6 +57,32 @@ export class Order {
 
     @Prop({ trim: true, maxlength: 500, default: '' })
     notes: string;
+
+    
+    @Prop({ required: true, trim: true, maxlength: 300 })
+    address: string;
+
+    @Prop({ required: true, trim: true, maxlength: 20 })
+    phone: string;
+
+    @Prop({ trim: true, maxlength: 20 })
+    alternatePhone?: string;
+
+    @Prop({ trim: true, maxlength: 100 })
+    city?: string;
+
+    @Prop({ trim: true, maxlength: 150 })
+    landmark?: string;
+
+    @Prop({
+        type: String,
+        enum: PaymentMethod,
+        default: PaymentMethod.COD,
+    })
+    paymentMethod: PaymentMethod;
+
+    @Prop({ required: true, min: 0, default: 0 })
+    deliveryFee: number;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

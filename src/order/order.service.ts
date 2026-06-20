@@ -33,81 +33,92 @@ export class OrderService {
         private readonly authRepository: AuthRepository
     ) { }
 
-    async create(dto: CreateOrderDto, userId: string) {
-        const ids = dto.items.map((i) => i.productId);
+    
+async create(dto: CreateOrderDto, userId: string) {
+    const ids = dto.items.map((i) => i.productId);
 
-        if (new Set(ids).size !== ids.length) {
-            throw new ConflictException('Duplicate product in order');
-        }
-
-        const products = await Promise.all(
-            ids.map((id) => this.productRepository.findById(id)),
-        );
-
-        const inactive = products.filter((p) => p?.status === 'INACTIVE');
-        if (inactive.length) {
-            throw new ConflictException(
-                `Unavailable: ${inactive.map((p) => p?.name).join(', ')}`,
-            );
-        }
-
-        const stockErrors: string[] = [];
-        for (let i = 0; i < dto.items.length; i++) {
-            const product = products[i];
-            if (!product) {
-                stockErrors.push(`Product not found: ${dto.items[i].productId}`);
-                continue;
-            }
-
-            if (dto.items[i].quantity > product.stock) {
-                stockErrors.push(`Only ${product.stock} available for ${product.name}`);
-            }
-        }
-
-        if (stockErrors.length) {
-            throw new BadRequestException(stockErrors.join(' | '));
-        }
-
-        const orderItems = dto.items.map((item, i) => {
-            const product = products[i]!;
-            return {
-                productId: new Types.ObjectId(item.productId),
-                productName: product.name,
-                quantity: item.quantity,
-                unitPrice: product.price,
-                subtotal: product.price * item.quantity,
-            };
-        });
-
-        const totalPrice = orderItems.reduce((s, i) => s + i.subtotal, 0);
-
-        // deduct stock
-        for (const item of dto.items) {
-            await this.productRepository.deductStock(item.productId, item.quantity);
-        }
-
-        const user = await this.authRepository.findOne(userId)
-        if (!user) {
-            throw new NotFoundException("User not found")
-        }
-        const order = await this.ordersRepository.create({
-            customerName: dto.customerName,
-            items: orderItems,
-            totalPrice,
-            notes: dto.notes || '',
-            status: OrderStatus.PENDING,
-            createdBy: new Types.ObjectId(user._id),
-        });
-
-        await this.activityLogService.log({
-            action: LogAction.ORDER_CREATED,
-            entity: 'order',
-            entityId: order._id.toString(),
-            userId:user._id as unknown as string
-        });
-
-        return order;
+    if (new Set(ids).size !== ids.length) {
+        throw new ConflictException('Duplicate product in order');
     }
+
+    const products = await Promise.all(
+        ids.map((id) => this.productRepository.findById(id)),
+    );
+
+    const inactive = products.filter((p) => p?.status === 'INACTIVE');
+    if (inactive.length) {
+        throw new ConflictException(
+            `Unavailable: ${inactive.map((p) => p?.name).join(', ')}`,
+        );
+    }
+
+    const stockErrors: string[] = [];
+    for (let i = 0; i < dto.items.length; i++) {
+        const product = products[i];
+        if (!product) {
+            stockErrors.push(`Product not found: ${dto.items[i].productId}`);
+            continue;
+        }
+        if (dto.items[i].quantity > product.stock) {
+            stockErrors.push(`Only ${product.stock} available for ${product.name}`);
+        }
+    }
+
+    if (stockErrors.length) {
+        throw new BadRequestException(stockErrors.join(' | '));
+    }
+
+    const orderItems = dto.items.map((item, i) => {
+        const product = products[i]!;
+        return {
+            productId: new Types.ObjectId(item.productId),
+            productName: product.name,
+            quantity: item.quantity,
+            unitPrice: product.price,
+            subtotal: product.price * item.quantity,
+        };
+    });
+
+    const subtotal = orderItems.reduce((s, i) => s + i.subtotal, 0);
+
+    // Match the frontend's free-shipping-over-$100 rule
+    const deliveryFee = subtotal > 100 ? 0 : 10;
+    const totalPrice = subtotal + deliveryFee;
+
+    // deduct stock
+    for (const item of dto.items) {
+        await this.productRepository.deductStock(item.productId, item.quantity);
+    }
+
+    const user = await this.authRepository.findOne(userId);
+    if (!user) {
+        throw new NotFoundException('User not found');
+    }
+
+    const order = await this.ordersRepository.create({
+        customerName: dto.customerName,
+        items: orderItems,
+        totalPrice,
+        deliveryFee,
+        notes: dto.notes || '',
+        address: dto.address,
+        phone: dto.phone,
+        alternatePhone: dto.alternatePhone,
+        city: dto.city,
+        landmark: dto.landmark,
+        status: OrderStatus.PENDING,
+        createdBy: new Types.ObjectId(user._id),
+    });
+
+    await this.activityLogService.log({
+        action: LogAction.ORDER_CREATED,
+        entity: 'order',
+        entityId: order._id.toString(),
+        userId: user._id as unknown as string,
+    });
+
+    return order;
+}
     async findAll(filters: Record<string, any>): Promise<GetOrdersDto> {
         const query: any = {};
 
