@@ -1,40 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+
 import {
   RestockQueue,
   RestockQueueDocument,
 } from '../restock-queue/schemas/restock-queue.schema';
-import { Order, OrderDocument, OrderStatus } from '../order/schemas/order.schema';
-import { Product, ProductDocument, ProductStatus } from '../product/schemas/product.schema';
+
+import {
+  Order,
+  OrderDocument,
+  OrderStatus,
+} from '../order/schemas/order.schema';
+
+import {
+  Product,
+  ProductDocument,
+  ProductStatus,
+} from '../product/schemas/product.schema';
 
 @Injectable()
 export class DashboardRepository {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<OrderDocument>,
+
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
+
     @InjectModel(RestockQueue.name)
     private readonly queueModel: Model<RestockQueueDocument>,
-  ) { }
+  ) {}
 
+  /* ---------------------------
+   * ORDERS STATS (TODAY)
+   * --------------------------*/
   async getOrderStats(start: Date, end: Date) {
     const [result] = await this.orderModel.aggregate([
       {
         $facet: {
           ordersToday: [
-            { $match: { createdAt: { $gte: start, $lte: end } } },
+            {
+              $match: {
+                createdAt: { $gte: start, $lte: end },
+              },
+            },
             { $count: 'count' },
           ],
+
           pendingOrders: [
             { $match: { status: OrderStatus.PENDING } },
             { $count: 'count' },
           ],
+
           completedOrders: [
             { $match: { status: OrderStatus.DELIVERED } },
             { $count: 'count' },
           ],
+
           revenueToday: [
             {
               $match: {
@@ -42,19 +65,24 @@ export class DashboardRepository {
                 status: { $ne: OrderStatus.CANCELLED },
               },
             },
+            { $unwind: '$items' },
             {
               $group: {
                 _id: null,
-                total: { $sum: '$totalPrice' },
+                total: { $sum: '$items.subtotal' },
               },
             },
           ],
         },
       },
     ]);
+
     return result;
   }
 
+  /* ---------------------------
+   * PRODUCT COUNTS
+   * --------------------------*/
   async getProductCounts() {
     const [totalProducts, outOfStockCount] = await Promise.all([
       this.productModel.countDocuments({
@@ -64,6 +92,7 @@ export class DashboardRepository {
         status: ProductStatus.OUT_OF_STOCK,
       }),
     ]);
+
     return { totalProducts, outOfStockCount };
   }
 
@@ -71,6 +100,9 @@ export class DashboardRepository {
     return this.queueModel.countDocuments();
   }
 
+  /* ---------------------------
+   * PRODUCT SUMMARY
+   * --------------------------*/
   async getProductSummary() {
     return this.productModel
       .find({ status: { $ne: ProductStatus.INACTIVE } })
@@ -81,6 +113,9 @@ export class DashboardRepository {
       .lean();
   }
 
+  /* ---------------------------
+   * REVENUE TREND (CHART)
+   * --------------------------*/
   async getRevenueTrend(days: number) {
     const start = new Date();
     start.setDate(start.getDate() - (days - 1));
@@ -93,12 +128,16 @@ export class DashboardRepository {
           status: { $ne: OrderStatus.CANCELLED },
         },
       },
+      { $unwind: '$items' },
       {
         $group: {
           _id: {
-            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+            },
           },
-          revenue: { $sum: '$totalPrice' },
+          revenue: { $sum: '$items.subtotal' },
           orders: { $sum: 1 },
         },
       },
@@ -106,6 +145,9 @@ export class DashboardRepository {
     ]);
   }
 
+  /* ---------------------------
+   * ORDER STATUS BREAKDOWN
+   * --------------------------*/
   async getOrderStatusBreakdown() {
     return this.orderModel.aggregate([
       {
@@ -117,8 +159,14 @@ export class DashboardRepository {
     ]);
   }
 
+  /* ---------------------------
+   * TOP SELLING PRODUCTS
+   * --------------------------*/
   async getTopSellingProducts(limit: number, days?: number) {
-    const match: any = { status: { $ne: OrderStatus.CANCELLED } };
+    const match: any = {
+      status: { $ne: OrderStatus.CANCELLED },
+    };
+
     if (days) {
       const start = new Date();
       start.setDate(start.getDate() - days);
@@ -141,6 +189,9 @@ export class DashboardRepository {
     ]);
   }
 
+  /* ---------------------------
+   * STOCK BY CATEGORY
+   * --------------------------*/
   async getStockByCategory() {
     return this.productModel.aggregate([
       { $match: { status: { $ne: ProductStatus.INACTIVE } } },
@@ -152,7 +203,12 @@ export class DashboardRepository {
           as: 'categoryInfo',
         },
       },
-      { $unwind: { path: '$categoryInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $unwind: {
+          path: '$categoryInfo',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $group: {
           _id: '$category',
@@ -165,6 +221,9 @@ export class DashboardRepository {
     ]);
   }
 
+  /* ---------------------------
+   * RESTOCK PRIORITY
+   * --------------------------*/
   async getRestockQueueByPriority() {
     return this.queueModel.aggregate([
       {
@@ -176,6 +235,9 @@ export class DashboardRepository {
     ]);
   }
 
+  /* ---------------------------
+   * WEEKLY COMPARISON
+   * --------------------------*/
   async getWeeklyRevenueComparison() {
     const now = new Date();
 
@@ -199,16 +261,34 @@ export class DashboardRepository {
                 status: { $ne: OrderStatus.CANCELLED },
               },
             },
-            { $group: { _id: null, total: { $sum: '$totalPrice' }, orders: { $sum: 1 } } },
+            { $unwind: '$items' },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$items.subtotal' },
+                orders: { $sum: 1 },
+              },
+            },
           ],
+
           lastWeek: [
             {
               $match: {
-                createdAt: { $gte: lastWeekStart, $lte: lastWeekEnd },
+                createdAt: {
+                  $gte: lastWeekStart,
+                  $lte: lastWeekEnd,
+                },
                 status: { $ne: OrderStatus.CANCELLED },
               },
             },
-            { $group: { _id: null, total: { $sum: '$totalPrice' }, orders: { $sum: 1 } } },
+            { $unwind: '$items' },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$items.subtotal' },
+                orders: { $sum: 1 },
+              },
+            },
           ],
         },
       },
@@ -217,9 +297,12 @@ export class DashboardRepository {
     return result;
   }
 
-
+  /* ---------------------------
+   * RECENT ORDERS
+   * --------------------------*/
   async getRecentOrders(limit: number, userId?: string) {
     const filter = userId ? { createdBy: userId } : {};
+
     return this.orderModel
       .find(filter)
       .select('customerName status totalPrice createdAt')
